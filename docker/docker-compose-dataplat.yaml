@@ -1,0 +1,38 @@
+
+services:
+  newsnow:
+    image: ghcr.io/ourongxing/newsnow:latest
+    container_name: newsnow
+    restart: always
+    ports:
+      - '14444:4444'
+    environment:
+      - G_CLIENT_ID=
+      - G_CLIENT_SECRET=
+      - JWT_SECRET=
+      - INIT_TABLE=true
+      - ENABLE_CACHE=true
+    volumes:
+      - data-newsnow:/usr/app/.data
+    networks:
+      - dataplat
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    restart: always
+    ports:
+      - '15678:5678'
+    volumes:
+      - data-n8n:/home/node/.n8n
+
+volumes:
+  data-newsnow:
+    driver: local
+  data-n8n:
+    driver: local
+
+networks:
+  dataplat:
+    driver: bridge
+
