@@ -1,24 +1,51 @@
 
 services:
-  openhands-app:
-    image: docker.all-hands.dev/all-hands-ai/openhands:0.39
-    container_name: openhands-app
-    restart: always
+
+  auto-prompt:
+    image: registry.cn-shenzhen.aliyuncs.com/tokengo/console
     ports:
-      - '10003:3000'
+      - 10426:8080
     environment:
-      - SANDBOX_RUNTIME_CONTAINER_IMAGE:docker.all-hands.dev/all-hands-ai/runtime:0.39-nikolaik
-      - LOG_ALL_EVENTS:true
+      - TZ=Asia/Shanghai
+      - DEFAULT_USERNAME=admin # 默认管理员账户
+      - DEFAULT_PASSWORD=admin123 # 默认管理员账户
+      - API_KEY=ollama # 替换为您的API密钥
+      - OpenAIEndpoint=https://host.docker.internal:11434/v1 # OpenAI API端点
+      - SCORE_MODEL=qwen3:8b
+      - CHAT_MODEL=qwen3:8b,qwen3:14b
+      - DEFAULT_CHAT_MODEL=qwen3:8b
+      - ConnectionStrings:Type=sqlite
+      - ConnectionStrings:Default=Data Source=/app/data/ConsoleService.db
     volumes:
-      - data-openhands:/.openhands-state
+      - data-autoprompt:/app/data
     extra_hosts:
-      - host.docker.internal:host-gateway
+      - "host.docker.internal:host-gateway"
     networks:
       - agents
 
+  prompt-optimizer:
+    image: linshen/prompt-optimizer
+    restart: always
+    ports:
+      - 10427:80
+    environment:
+      - TZ=Asia/Shanghai
+      - ACCESS_USERNAME=admin 
+      - ACCESS_PASSWORD=admin123 
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    ports:
+      - '15678:5678'
+    volumes:
+      - data-n8n:/home/node/.n8n
+
 
 volumes:
-  data-openhands:
+  data-autoprompt:
+    driver: local
+  data-n8n:
     driver: local
 
 networks:

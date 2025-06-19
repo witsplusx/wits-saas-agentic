@@ -128,8 +128,8 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
-.env_copy
+# .env
+# .env_copy
 .venv
 env/
 venv/
@@ -176,3 +176,4 @@ cython_debug/
 
 examples/
 cpnt-servers/
+cpnt-check/

@@ -1,0 +1,27 @@
+
+Default Username: openspg
+Default password: openspg@kag
+
+
+{
+  "database":"neo4j", # 图存储的数据库名称，固定和知识库英文名称保持一致，且不可修改
+  "uri":"neo4j://release-openspg-neo4j:7687", # 自带的openspg-neo4j默认值为：neo4j://release-openspg-neo4j:7687
+  "user":"neo4j", # 自带的openspg-neo4j默认值为：neo4j
+  "password":"neo4j@openspg", # 自带的openspg-neo4j默认值为：neo4j@openspg
+}
+
+
+
+{
+    "type": "openai",
+    "model": "BAAI/bge-m3",
+    "base_url": "https://api.siliconflow.cn/v1",
+    "api_key": "YOUR_API_KEY",
+    "vector_dimensions": "1024"
+}
+
+
+
+
+
+

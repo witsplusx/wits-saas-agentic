@@ -45,13 +45,13 @@ services:
       CHROMIUM_FLAGS: '--disable-gpu --no-sandbox --headless=new'
     security_opt:
     - seccomp=unconfined  # This might help with browser sandbox issues
-    shm_size: '2gb' # Increase shared memory size for Chromium
-    mem_limit: 2g   # Set a 2GB memory limit
+    shm_size: '8gb' # Increase shared memory size for Chromium
+    mem_limit: 8g   # Set a 2GB memory limit
     depends_on:
       - postgres
       - minio
     volumes:
-      - /var/run/dbus:/var/run/dbus
+      - backend_data:/var/run/dbus
 
   frontend:
       #build:
@@ -70,3 +70,4 @@ services:
 volumes:
   postgres_data:
   minio_data:
+  backend_data:
