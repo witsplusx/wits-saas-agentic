@@ -1,0 +1,28 @@
+
+pip install llama-index-core llama-index-readers-file llama-index-llms-ollama llama-index-embeddings-huggingface
+
+pip install llama-index-llms-modelscope
+pip install llama-index-embeddings-modelscope
+
+pip install llama-index-embeddings-ollama
+
+
+
+$env:HF_ENDPOINT = "https://hf-mirror.com"
+
+pip install hf_xet
+
+python .\cpnt-check\llamaindex\sty01\demo02_ms.py
+
+
+教程
+https://www.aidoczh.com/llamaindex/understanding/agent/index.html
+
+
+pip install llama-index-tools-yahoo-finance
+
+pip install llama-index-tools-tavily-research
+
+pip install llama-index-core
+pip install llama-index-utils-workflow
+

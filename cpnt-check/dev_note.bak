@@ -1,0 +1,21 @@
+
+pip install llama-index
+pip install llama-index-llms-ollama llama-index-embeddings-huggingface
+
+from llama_index.llms.ollama import Ollama
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -178,4 +178,4 @@ cython_debug/
 
 examples/
 cpnt-servers/
-cpnt-check/
+# cpnt-check/
