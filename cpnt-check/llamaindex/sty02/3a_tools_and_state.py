@@ -14,6 +14,8 @@ llm = Ollama(
     request_timeout=360.0,
     # Manually set the context window to limit memory usage
     context_window=8000,
+    thinking=False,
+    streaming=True
 )
 
 async def set_name(ctx: Context, name: str) -> str:
@@ -33,11 +35,11 @@ async def main():
     ctx = Context(workflow)
 
     # check if it knows a name before setting it
-    response = await workflow.run(user_msg="What's my name?", ctx=ctx)
+    response = await workflow.run(user_msg="What's my name? /no_think", ctx=ctx)
     print(str(response))
 
     # set the name using a tool
-    response2 = await workflow.run(user_msg="My name is Laurie", ctx=ctx)
+    response2 = await workflow.run(user_msg="My name is Laurie /no_think", ctx=ctx)
     print(str(response2))
 
     # retrieve the value from the state directly

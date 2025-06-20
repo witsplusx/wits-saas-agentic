@@ -5,15 +5,21 @@ pip install llama-index-llms-ollama llama-index-embeddings-huggingface
 from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
+pip install llama-index-core
+pip install llama-index-utils-workflow
 
 
 
+pip install llama-index-readers-file
+pip install llama-index-embeddings-openai 
+pip install llama-index-agent-openai
+pip install llama-index-llms-openai
+pip install llama-index-question-gen-openai
+pip install unstructured
 
 
-
-
-
-
+pip install llama-index-readers-smart-pdf-loader
+pip install llmsherpa
 
 
 

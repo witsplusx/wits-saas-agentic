@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from llama_index.llms.openai import OpenAI
 from llama_index.core.agent.workflow import AgentWorkflow
 from llama_index.core.workflow import Context
 from llama_index.core.agent.workflow import (
@@ -19,9 +18,9 @@ from llama_index.llms.ollama import Ollama
 # llm = OpenAI(model="gpt-4o-mini")
 llm = Ollama(
     model="qwen3:8b",
-    request_timeout=360.0,
     # Manually set the context window to limit memory usage
     context_window=8000,
+    thinking=False
 )
 
 tavily_tool = TavilyToolSpec( api_key=os.getenv("TAVILY_API_KEY") )

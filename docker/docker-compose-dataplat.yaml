@@ -18,6 +18,7 @@ services:
       - dataplat
 
 
+
 volumes:
   data-newsnow:
     driver: local
