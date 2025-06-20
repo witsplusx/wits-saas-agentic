@@ -17,8 +17,6 @@ docker compose -f docker/KAG/docker-compose.yml -p witsmt-kag up -d
 
 docker compose -f docker/milvus/milvus-standalone-docker-compose.yml -p witsmt-milvus up -d
 
-
-
 添加本地IP访问
 --add-host host.docker.internal:host-gateway
 
