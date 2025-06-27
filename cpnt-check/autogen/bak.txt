@@ -1,0 +1,12 @@
+
+# Install AgentChat and OpenAI client from Extensions
+pip install -U "autogen-agentchat" "autogen-ext[openai]"
+
+
+
+autogenstudio ui --port 8380 --appdir ./cpnt-check/autogen/myapp
+
+
+
+
+

@@ -1,0 +1,28 @@
+version: "3"
+services:
+  openvpn-as:
+    build:
+      context: .
+    image: openvpn-as
+    container_name: openvpn-as
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+      - INTERFACE=eth1 #网卡名，可选
+    volumes:
+      - openvpn_data:/config
+    ports:
+      - 943:943
+      - 9443:9443
+      - 1194:1194/udp
+    restart: unless-stopped
+
+
+volumes:
+  openvpn_data:
+    driver: local
+
+

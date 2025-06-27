@@ -1,0 +1,9 @@
+
+docker compose -f docker-compose.yml -p cityll-openvpn build
+
+
+
+openvpn  详细安装
+https://yangpin.link/archives/1571.html
+
+

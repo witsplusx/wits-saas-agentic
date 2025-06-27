@@ -1,0 +1,6 @@
+FROM linuxserver/openvpn-as:latest
+
+# 技术手段，不然会安装不了openvpn
+RUN echo 'Acquire::http::Proxy "http://192.168.2.148:10809/";\nAcquire::http::Proxy "http://192.168.2.148:10809/";'>/etc/apt/apt.conf.d/proxy.conf
+# apt替换为国内镜像源
+RUN echo 'deb http://mirrors.cernet.edu.cn/ubuntu/ jammy main restricted universe multiverse\ndeb http://mirrors.cernet.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse\ndeb http://mirrors.cernet.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse\ndeb http://mirrors.cernet.edu.cn/ubuntu/ jammy-security main restricted universe multiverse'> /etc/apt/sources.list

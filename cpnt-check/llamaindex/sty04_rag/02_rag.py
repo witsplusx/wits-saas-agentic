@@ -29,12 +29,12 @@ from llama_index.core import StorageContext, load_index_from_storage
 # 加载向量库
 try:
     storage_context = StorageContext.from_defaults(
-        persist_dir="./cpnt-check/llamaindex/sty04_rag/storage/lyft"
+        persist_dir="./datas/storage/lyft"
     )
     lyft_index = load_index_from_storage(storage_context)
 
     storage_context = StorageContext.from_defaults(
-        persist_dir="./cpnt-check/llamaindex/sty04_rag/storage/uber"
+        persist_dir="./datas/storage/uber"
     )
     uber_index = load_index_from_storage(storage_context)
     index_loaded = True
@@ -47,10 +47,10 @@ from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 if not index_loaded:
     # load data
     lyft_docs = SimpleDirectoryReader(
-        input_files=["./cpnt-check/llamaindex/sty04_rag/data/lyft_2021.pdf"]
+        input_files=["./datas/data/lyft_2021.pdf"]
     ).load_data()
     uber_docs = SimpleDirectoryReader(
-        input_files=["./cpnt-check/llamaindex/sty04_rag/data/uber_2021.pdf"]
+        input_files=["./datas/data/uber_2021.pdf"]
     ).load_data()
 
     # build index
@@ -58,8 +58,8 @@ if not index_loaded:
     uber_index = VectorStoreIndex.from_documents(uber_docs)
 
     # persist index
-    lyft_index.storage_context.persist(persist_dir="./cpnt-check/llamaindex/sty04_rag/storage/lyft")
-    uber_index.storage_context.persist(persist_dir="./cpnt-check/llamaindex/sty04_rag/storage/uber")
+    lyft_index.storage_context.persist(persist_dir="./datas/storage/lyft")
+    uber_index.storage_context.persist(persist_dir="./datas/storage/uber")
 
 
 lyft_engine = lyft_index.as_query_engine(similarity_top_k=3)

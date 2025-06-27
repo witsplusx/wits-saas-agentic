@@ -1,0 +1,28 @@
+https://modelscope.cn/models/nanonets/Nanonets-OCR-s
+
+
+pip install docext
+python -m docext.app.app --model_name hosted_vllm/nanonets/Nanonets-OCR-s
+
+
+pip install --no-deps docext
+pip install accelerate json-repair litellm  loguru mdpd  pdf2image  PyMuPDF  python-levenshtein  tabulate  types-requests
+
+
+启动一个就行   比较强悍的文档转换工具
+VLLM_USE_MODELSCOPE=true vllm serve nanonets/Nanonets-OCR-s --host 127.0.0.1
+VLLM_USE_MODELSCOPE=true python -m docext.app.app --model_name hosted_vllm/nanonets/Nanonets-OCR-s
+
+
+
+部署MiniCPM4-8B
+VLLM_USE_MODELSCOPE=true  TRUST_REMOTE_CODE=true vllm serve OpenBMB/MiniCPM4-8B  --port 8001
+
+
+TRUST_REMOTE_CODE=true  vllm serve OpenBMB/MiniCPM4-8B  --port 8001
+
+
+vllm serve OpenBMB/MiniCPM4-8B  --port 8001
+
+
+
