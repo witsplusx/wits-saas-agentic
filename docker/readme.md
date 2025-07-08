@@ -6,6 +6,9 @@ docker compose -f docker/docker-compose-agents.yaml -p witsmt-dk-agents up -d
 
 docker compose -f docker/docker-compose-flow.yaml -p witsmt-dk-flow up -d
 
+docker compose -f docker/docker-compose-lowcode.yaml -p witsmt-dk-lowcode up -d
+
+
 deepseek api key:
 sk-846fd2681908413e94cfa79bd98b3673
 
@@ -32,3 +35,7 @@ ghcr.io/cinnamon/kotaemon:main-full
 docker run --name=kotaemon -e GRADIO_SERVER_NAME=0.0.0.0 -e GRADIO_SERVER_PORT=7860 -v D:/WITSMT-PROJS/rundatas/ktem_app_data:/app/ktem_app_data --add-host host.docker.internal:host-gateway -p 7860:7860 -itd ghcr.io/cinnamon/kotaemon:main-ollama
 
 docker run -itd --name higress-allinone -p 8201:8001 -p 8280:8080 -p 8243:8443  higress-registry.cn-hangzhou.cr.aliyuncs.com/higress/all-in-one:latest
+
+docker run -p 3830:80 --name drawdb -d drawdb
+
+docker run -p 3830:80 --name drawdb -d docker.xuanyuan.me/drawdb

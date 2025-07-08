@@ -1,0 +1,11 @@
+
+pip install deeplake
+
+
+https://docs-v3.activeloop.ai/setup/installation
+
+https://docs.deeplake.ai/latest/getting-started/quickstart/
+
+ACTIVELOOP_TOKEN=eyJhbGciOiJIUzUxMiIsImlhdCI6MTc1MTM1NjQyNywiZXhwIjoxNzgyODkyNDEwfQ.eyJpZCI6IndpdHNoaW5lIiwib3JnX2lkIjoid2l0c2hpbmUifQ.B0bJYyevgesHQS-3osGkkxyctihuRCGBc1x4UUxmE3Gw_VsEkR1LJ__Xgzw0TCRoAkyaEJR7tym6IzlvKQYbaQ
+
+
