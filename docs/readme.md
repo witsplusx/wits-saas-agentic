@@ -12,11 +12,7 @@ Markify：专为 LLM 优化的开源文档解析神器，轻松破解 PDF 难题
 docker run -itd --name=markify  -p 20926:20926 -p 8501:8501 docker.io/kylinmountain/markify:0.0.1
 streamlit run ./client/streamlit_client.py
 
-
-
 npx https://github.com/google-gemini/gemini-cli
 GEMINI_API_KEY="AIzaSyAXXmp9cRUEDL0KvXNDo31PwiXVwZKQkwc"
 
-
-
-
+conda activate wits-saas-agentic

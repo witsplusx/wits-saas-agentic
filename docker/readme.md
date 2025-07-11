@@ -8,7 +8,6 @@ docker compose -f docker/docker-compose-flow.yaml -p witsmt-dk-flow up -d
 
 docker compose -f docker/docker-compose-lowcode.yaml -p witsmt-dk-lowcode up -d
 
-
 deepseek api key:
 sk-846fd2681908413e94cfa79bd98b3673
 

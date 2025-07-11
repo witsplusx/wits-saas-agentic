@@ -1,0 +1,457 @@
+services:
+  postgres:
+    image: postgres:16
+    env_file: .env
+    environment:
+      - TZ=${TIMEZONE}
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=witsmt2025
+      - POSTGRES_DB=witsmt
+    ports:
+      - 5462:5432
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - witsmt
+    restart: on-failure
+
+  mysql:
+    image: mysql:8.0.39
+    environment:
+      - MYSQL_ROOT_PASSWORD=witsmt2025
+      - TZ=Asia/Shanghai
+    command: --max_connections=1000
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+      --tls_version="TLSv1.2,TLSv1.3"
+      --binlog_expire_logs_seconds=604800
+    ports:
+      - 3336:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - witsmt
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-pwitsmt2025"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    restart: on-failure
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    env_file: .env
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+      - ETCD_SNAPSHOT_COUNT=50000
+    volumes:
+      - milvus_etcd_data:/etcd
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - witsmt
+    restart: on-failure
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-06-13T11-33-47Z
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9010:9000"
+      - "9011:9001"
+    volumes:
+      - milvus_minio_data:/minio_data
+    command: minio server /minio_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # milvus-standalone:
+  #   image: milvusdb/milvus:2.5-20250703-3666fced-gpu-amd64
+  #   env_file: .env
+  #   command: ["milvus", "run", "standalone"]
+  #   environment:
+  #     ETCD_ENDPOINTS: etcd:2379
+  #     MINIO_ADDRESS: minio:9000
+  #   volumes:
+  #     - milvus_data:/var/lib/milvus
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
+  #     interval: 30s
+  #     start_period: 90s
+  #     timeout: 20s
+  #     retries: 3
+  #   ports:
+  #     - "19530:19530"
+  #     - "9091:9091"
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+  #   depends_on:
+  #     - "etcd"
+  #     - "minio"
+  #   networks:
+  #     - witsmt
+  #   restart: on-failure
+
+  # attu:
+  #   container_name: attu
+  #   image: zilliz/attu:v2.2.8
+  #   env_file: .env
+  #   environment:
+  #     MILVUS_URL: milvus-standalone:19530
+  #   ports:
+  #     - "8445:3000"
+  #   depends_on:
+  #     - "milvus-standalone"
+  #   networks:
+  #     - witsmt
+  #   restart: on-failure
+
+  tugraph:
+    container_name: tugraph
+    image: tugraph/tugraph-runtime-centos7
+    env_file: .env
+    volumes:
+      - tugraph_data:/var/lib/lgraph/data
+    ports:
+      - "37070:7070"
+      - "37687:7687"
+      - "39090:9090"
+    command: ["lgraph_server", "-d", "run", "--enable_plugin", "true"]
+    networks:
+      - witsmt
+    restart: on-failure
+
+  # admin 73@TuGraph
+
+  # keycloak:
+  #   container_name: keycloak
+  #   image: quay.io/keycloak/keycloak:26.1.0
+  #   env_file: .env
+  #   environment:
+  #     KC_BOOTSTRAP_ADMIN_USERNAME: admin
+  #     KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+  #     # JAVA_OPTS_KC_HEAP: "-XX:MaxHeapFreeRatio=30 -XX:MaxRAMPercentage=65"
+  #   command: ["start-dev"]
+  #   ports:
+  #     - "38400:8080"
+  #     - "38401:9000"
+  #   networks:
+  #     - witsmt
+  #   restart: on-failure
+
+  redis:
+    image: valkey/valkey:8
+    command: redis-server --requirepass witsmt2025 --maxmemory 1024mb --maxmemory-policy allkeys-lru
+    env_file: .env
+    ports:
+      - 6399:6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - witsmt
+    restart: on-failure
+
+  # openmldb:
+  #   container_name: openmldb
+  #   image: registry.cn-shenzhen.aliyuncs.com/tobe43/portable-openmldb
+  #   env_file: .env
+  #   ports:
+  #     - "38888:8888"
+  #   networks:
+  #     - witsmt
+  #   restart: on-failure
+
+  nodered:
+    image: nodered/node-red
+    env_file: .env
+    ports:
+      - "31880:1880"
+    volumes:
+      - nodered_data:/data
+    networks:
+      - witsmt
+    restart: on-failure
+
+  # sqlpad:
+  #   image: sqlpad/sqlpad:latest
+  #   env_file: .env
+  #   ports:
+  #     - "31003:3000"
+  #   environment:
+  #     SQLPAD_ADMIN: admin@sqlpad.com
+  #     SQLPAD_ADMIN_PASSWORD: admin
+  #   volumes:
+  #     - sqlpad_data:/var/lib/sqlpad
+  #   networks:
+  #     - witsmt
+  #   restart: on-failure
+
+  superset:
+    # image: apache/superset
+    image: lutinglt/superset-zh
+    env_file: .env
+    ports:
+      - "34118:8088"
+    networks:
+      - witsmt
+    restart: on-failure
+
+  falkordb:
+    # image: apache/superset
+    image: falkordb/falkordb:latest
+    env_file: .env
+    environment:
+      REDIS_ARGS: "--requirepass falkordb"
+      FALKORDB_ARGS: "BOLT_PORT 7687"
+    ports:
+      - "35300:3000"
+      - "35301:6379"
+      - "35302:7687"
+    volumes:
+      - falkordb_data:/data
+    networks:
+      - witsmt
+    restart: on-failure
+
+  # tika: # OCR Tools
+  #   image: apache/tika:latest-full
+  #   env_file: .env
+  #   ports:
+  #     - "39998:9998"
+  #   networks:
+  #     - witsmt
+  #   restart: on-failure
+
+  # qdrant: # Vector Store
+  #   image: qdrant/qdrant:gpu-nvidia-latest
+  #   env_file: .env
+  #   ports:
+  #     - "36333:6333"
+  #     - "36334:6334"
+  #   environment:
+  #     QDRANT__SERVICE__API_KEY: 123456
+  #     QDRANT__SERVICE__JWT_RBAC: true
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+  #   volumes:
+  #     - qdrant_data:/qdrant/storage:z
+  #   networks:
+  #     - witsmt
+  #   restart: on-failure
+
+  # kotaemon: # RAG & GraphRAG
+  #   image: ghcr.io/cinnamon/kotaemon:main-full
+  #   env_file: .env
+  #   ports:
+  #     - "30788:7860"
+  #   environment:
+  #     GRADIO_SERVER_NAME: 0.0.0.0
+  #     GRADIO_SERVER_PORT: 7860
+  #   volumes:
+  #     - kotaemon_data:/app/ktem_app_data
+  #   networks:
+  #     - witsmt
+  #   restart: on-failure
+
+  # funasr:
+  #   image: registry.cn-hangzhou.aliyuncs.com/funasr_repo/funasr:funasr-runtime-sdk-online-cpu-0.1.12
+  #   ports:
+  #     - "10195:10095"
+  #   networks:
+  #     - witsmt
+  #   restart: on-failure
+
+  # fun-asr:
+  #   image: guiji2025/fun-asr:1.0.2
+  #   restart: always
+  #   runtime: nvidia
+  #   privileged: true
+  #   working_dir: /workspace/FunASR/runtime
+  #   ports:
+  #     - '11095:10095'
+  #   command: sh /run.sh
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+
+  # langflow:
+  #   image: langflowai/langflow:latest # or another version tag on https://hub.docker.com/r/langflowai/langflow
+  #   pull_policy: always # set to 'always' when using 'latest' image
+  #   ports:
+  #     - "37860:7860"
+  #   depends_on:
+  #     - pg-langflow
+  #   environment:
+  #     - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@pg-langflow:5432/langflow
+  #     # This variable defines where the logs, file storage, monitor data and secret keys are stored.
+  #     - LANGFLOW_CONFIG_DIR=app/langflow
+  #   volumes:
+  #     - langflow-data:/app/langflow
+  #   networks:
+  #     - witsmt
+
+  # pg-langflow:
+  #   image: postgres:16
+  #   environment:
+  #     POSTGRES_USER: langflow
+  #     POSTGRES_PASSWORD: langflow
+  #     POSTGRES_DB: langflow
+  #   # ports:
+  #   #   - "5452:5432"
+  #   volumes:
+  #     - langflow-postgres:/var/lib/postgresql/data
+  #   networks:
+  #     - witsmt
+
+  # whisperlive:
+  #   image: ghcr.io/collabora/whisperlive-gpu:latest
+  #   ports:
+  #     - "19090:9090"
+  #   networks:
+  #     - witsmt
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+
+  openproject:
+    image: openproject/openproject:dev
+    ports:
+      - "19080:80"
+    environment:
+      - OPENPROJECT_HOST__NAME=127.0.0.1:19080
+      - OPENPROJECT_SECRET_KEY_BASE=secret
+      - OPENPROJECT_HTTPS=false
+      - OPENPROJECT_DEFAULT__LANGUAGE=zh-CN
+    volumes:
+      - openproject-data:/var/openproject/pgdata
+    networks:
+      - witsmt
+
+  nacos:
+    container_name: nacos
+    image: nacos/nacos-server
+    volumes:
+      - nacos_datas:/home/nacos/data
+      - nacos_logs:/home/nacos/logs
+    ports:
+      - "8849:8080"
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    environment:
+      # 环境变量 数据库连接信息
+      - MODE=standalone
+      - SPRING_DATASOURCE_PLATFORM=mysql
+      - MYSQL_SERVICE_HOST=mysql
+      - MYSQL_SERVICE_PORT=3306
+      - MYSQL_SERVICE_DB_NAME=nacos
+      - MYSQL_SERVICE_USER=root
+      - MYSQL_SERVICE_PASSWORD=witsmt2025
+      - MYSQL_SERVICE_DB_PARAM=characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&allowPublicKeyRetrieval=true&
+      - NACOS_AUTH_IDENTITY_KEY=serverIdentity
+      - NACOS_AUTH_IDENTITY_VALUE=security
+      - NACOS_AUTH_TOKEN=SecretKey012345678901234567890123456789012345678901234567890123456789
+    restart: always
+    depends_on:
+      - mysql
+    networks:
+      - witsmt
+
+  # kafka:
+  #   image: quay.io/herodotus-cloud/kafka:4.0.0
+  #   hostname: kafka
+  #   environment:
+  #     KAFKA_NODE_ID: 0
+  #     KAFKA_PROCESS_ROLES: "broker,controller"
+  #     KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+  #     KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
+  #     KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+  #     KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:19092,EXTERNAL://192.168.101.10:9092"
+  #     KAFKA_CONTROLLER_QUORUM_VOTERS: "0@kafka:29092"
+  #     KAFKA_LISTENERS: "CONTROLLER://:29092,INTERNAL://:19092,EXTERNAL://:9092"
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #     KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #     KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  #     KAFKA_NUM_PARTITIONS: 3
+  #   ports:
+  #     - "9092:9092"
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"
+  #   networks:
+  #     - witsmt
+
+volumes:
+  milvus_etcd_data:
+    driver: local
+  infinity_data:
+    driver: local
+  pg_data:
+    driver: local
+  redis_data:
+    driver: local
+  milvus_minio_data:
+    driver: local
+  milvus_data:
+    driver: local
+  tugraph_data:
+    driver: local
+  nodered_data:
+    driver: local
+  sqlpad_data:
+    driver: local
+  xinference-data:
+    driver: local
+  qdrant_data:
+    driver: local
+  kotaemon_data:
+    driver: local
+  superset_data:
+    driver: local
+  falkordb_data:
+    driver: local
+  langflow-data:
+    driver: local
+  langflow-postgres:
+    driver: local
+  openproject-data:
+    driver: local
+  nacos_datas:
+    driver: local
+  nacos_logs:
+    driver: local
+  mysql_data:
+    driver: local
+
+networks:
+  witsmt:
+    driver: bridge

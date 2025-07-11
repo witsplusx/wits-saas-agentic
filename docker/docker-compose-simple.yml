@@ -1,0 +1,65 @@
+services:
+  mysql:
+    image: mysql:8.0.39
+    environment:
+      - MYSQL_ROOT_PASSWORD=witsmt2025
+      - TZ=Asia/Shanghai
+    command: --max_connections=1000
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --default-authentication-plugin=mysql_native_password
+      --tls_version="TLSv1.2,TLSv1.3"
+      --binlog_expire_logs_seconds=604800
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - witsmt
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-pwitsmt2025"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    restart: on-failure
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-06-13T11-33-47Z
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/minio_data
+    command: minio server /minio_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  redis:
+    image: valkey/valkey:8
+    command: redis-server --requirepass witsmt2025 --maxmemory 1024mb --maxmemory-policy allkeys-lru
+    env_file: .env
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - witsmt
+    restart: on-failure
+
+volumes:
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+  mysql_data:
+    driver: local
+
+networks:
+  witsmt:
+    driver: bridge
